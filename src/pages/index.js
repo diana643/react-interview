@@ -1,10 +1,11 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Typography, Grid } from "@material-ui/core";
 import MovieCard from "../components/MovieCard";
 import { movies$ } from "../data/movies";
-import TextField from '@material-ui/core/TextField';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Checkbox from "@material-ui/core/Checkbox";
+import Pagination from "@material-ui/lab/Pagination";
 
 const useStyles = makeStyles({
   root: {
@@ -12,6 +13,9 @@ const useStyles = makeStyles({
   },
   item: {
     margin: "20px 0"
+  },
+  label: {
+    fontSize: "35px"
   }
 });
 
@@ -19,32 +23,84 @@ const Index = (props) => {
   const classes = useStyles();
 
   const [moviesList, setMoviesList] = useState([]);
+  const [list,setList] = useState([]);
 
   useEffect(() => {
-    movies$.then((moviesList) => {
-      setMoviesList(moviesList);
+    movies$.then((value) => {
+      setMoviesList(value);
+      setList(value);
     });
-    //console.log(moviesList.title);
+  }, []);
+
+  const [category, setCategory] = useState([
+    "Comedy",
+    "Animation",
+    "Thriller",
+    "Drame"
+  ]);
+
+  const [state, setState] = React.useState({
+    Comedy: false,
+    Animation: false,
+    Thriller: false,
+    Drame: false
   });
+
+  const handleChange = (event) => {
+    setState({ ...state, [event.target.name]: event.target.checked });
+    const results = moviesList.filter(
+      (item) =>
+        item.category.includes(event.target.name) &&
+        event.target.checked === true
+    );
+    setMoviesList(results);
+    if(event.target.checked === false){
+        setMoviesList(list);
+    }
+  };
+
+  const handleDelete = (id) => {
+    let newArr = [...moviesList];
+    let newlist = newArr.filter((item) => item.id !== id);
+    setMoviesList(newlist);
+    setList(newlist);
+  };
 
   return (
     <Grid className={classes.root}>
+        <Grid container style={{margin: '30px 0'}}>
+            <Typography variant="h4">Welcome to your movie list</Typography>
+        </Grid>
       <Grid container>
         <Grid item>
-          <Autocomplete
-            options={moviesList}
-            getOptionLabel={(option) => option.title}
-            style={{ width: 300 }}
-            renderInput={(params) => (
-              <TextField {...params} label="Combo box" variant="outlined" />
-            )}
-          />
+          <Grid
+            container
+            spacing={3}
+            justify="space-between"
+            alignItems="center">
+            {category.map((data) => (
+              <Grid item>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      className={classes.label}
+                      checked={state.checked}
+                      onChange={handleChange}
+                      name={data}
+                    />
+                  }
+                  label={data}
+                />
+              </Grid>
+            ))}
+          </Grid>
         </Grid>
       </Grid>
       <Grid container justify="flex-start" spacing={3}>
-        {moviesList.map(data => (
+        {moviesList.map((data) => (
           <Grid item key={data.id} className={classes.item}>
             <MovieCard
+              handleDelete={(id) => handleDelete(data.id)}
               id={data.id}
               title={data.title}
               category={data.category}
@@ -53,6 +109,12 @@ const Index = (props) => {
             />
           </Grid>
         ))}
+      </Grid>
+      <Grid container justify="center">
+          <Grid item>
+          <Pagination count={3} />
+          </Grid>
+        
       </Grid>
     </Grid>
   );

@@ -31,6 +31,9 @@ const MovieCard = (props) => {
   const [likes, setLikes] = useState(props.likes);
   const [dislikes, setDislikes] = useState(props.dislikes);
 
+  const handleDelete = () =>{
+      props.handleDelete(props.id);
+  }
    const handleLike = () => {
      setLikes(likes + 1);
   };
@@ -42,7 +45,7 @@ const MovieCard = (props) => {
   return (
     <Card className={classes.root}>
       <CardActions className={classes.actionArea}>
-        <IconButton size="small" className>
+        <IconButton size="small" className onClick={handleDelete}>
           <CloseIcon />
         </IconButton>
       </CardActions>
