@@ -23,7 +23,20 @@ const Index = (props) => {
   const classes = useStyles();
 
   const [moviesList, setMoviesList] = useState([]);
-  const [list,setList] = useState([]);
+  const [list, setList] = useState([]);
+  // eslint-disable-next-line
+  const [category, setCategory] = useState([
+    "Comedy",
+    "Animation",
+    "Thriller",
+    "Drame"
+  ]);
+  const [state, setState] = React.useState({
+    Comedy: false,
+    Animation: false,
+    Thriller: false,
+    Drame: false
+  });
 
   useEffect(() => {
     movies$.then((value) => {
@@ -32,31 +45,33 @@ const Index = (props) => {
     });
   }, []);
 
-  const [category, setCategory] = useState([
-    "Comedy",
-    "Animation",
-    "Thriller",
-    "Drame"
-  ]);
+  let cat = [];
+  //let movieFilterList = moviesList;
 
-  const [state, setState] = React.useState({
-    Comedy: false,
-    Animation: false,
-    Thriller: false,
-    Drame: false
+  useEffect(() => {
+    for (let i in state) {
+      if (state[i] === true) {
+        cat.push(i);
+      }
+    }
   });
+
+  let results = [];
+
+  useEffect(() => {
+    for (let i in cat) {
+      const result = moviesList.filter((item) =>
+        item.category.includes(cat[i])
+      );
+      results = results.concat(result);
+    }
+    if (cat === []) {
+      setMoviesList(list);
+    }
+  }, [cat]);
 
   const handleChange = (event) => {
     setState({ ...state, [event.target.name]: event.target.checked });
-    const results = moviesList.filter(
-      (item) =>
-        item.category.includes(event.target.name) &&
-        event.target.checked === true
-    );
-    setMoviesList(results);
-    if(event.target.checked === false){
-        setMoviesList(list);
-    }
   };
 
   const handleDelete = (id) => {
@@ -68,9 +83,9 @@ const Index = (props) => {
 
   return (
     <Grid className={classes.root}>
-        <Grid container style={{margin: '30px 0'}}>
-            <Typography variant="h4">Welcome to your movie list</Typography>
-        </Grid>
+      <Grid container style={{ margin: "30px 0" }}>
+        <Typography variant="h4">Welcome to your movie list</Typography>
+      </Grid>
       <Grid container>
         <Grid item>
           <Grid
@@ -109,12 +124,42 @@ const Index = (props) => {
             />
           </Grid>
         ))}
+        {/* {results === [] ? (
+          <div>
+            {moviesList.map((data) => (
+              <Grid item key={data.id} className={classes.item}>
+                <MovieCard
+                  handleDelete={(id) => handleDelete(data.id)}
+                  id={data.id}
+                  title={data.title}
+                  category={data.category}
+                  likes={data.likes}
+                  dislikes={data.dislikes}
+                />
+              </Grid>
+            ))}
+          </div>
+        ) : (
+          <div>
+            {results.map((data) => (
+              <Grid item key={data.id} className={classes.item}>
+                <MovieCard
+                  handleDelete={(id) => handleDelete(data.id)}
+                  id={data.id}
+                  title={data.title}
+                  category={data.category}
+                  likes={data.likes}
+                  dislikes={data.dislikes}
+                />
+              </Grid>
+            ))}
+          </div>
+        )} */}
       </Grid>
       <Grid container justify="center">
-          <Grid item>
+        <Grid item>
           <Pagination count={3} />
-          </Grid>
-        
+        </Grid>
       </Grid>
     </Grid>
   );
